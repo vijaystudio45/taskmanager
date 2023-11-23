@@ -1,0 +1,17 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-12 d-flex flex-column align-items-center">
+      <h1>Welcome to your dashboard {{ user.username }}</h1>
+      <div class="dashboard-container">
+        <a class="dashboardBtns" href="{% url 'create_team' %}" class="btn btn-primary">Create Team</a>
+        <a class="dashboardBtns" href="{% url 'team_list' %}" class="btn btn-primary">Team List</a>
+        <a class="dashboardBtns" href="{% url 'create_task' %}" class="btn btn-primary">Create Task</a>
+        <a class="dashboardBtns" href="{% url 'task_list' %}" class="btn btn-primary">Task List</a>
+        <a class="dashboardBtns" href="{% url 'my_task_list' %}" class="btn btn-primary">My Tasks</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

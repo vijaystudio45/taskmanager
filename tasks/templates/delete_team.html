@@ -1,0 +1,14 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<div class="delete-container">
+  <h2>Delete Team</h2>
+  <form method="post" action="{% url 'delete_team' pk=team.id %}">
+    {% csrf_token %}
+    <p>Are you sure you want to delete the team "{{ team.name }}"?</p>
+   <div class="d-flex justify-content-center">
+    <button class="btn btn-danger" type="submit">Delete Team</button>
+   </div>
+  </form>
+</div>
+{% endblock %}

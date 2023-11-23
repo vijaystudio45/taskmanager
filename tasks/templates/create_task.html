@@ -1,0 +1,11 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="createTeam-container">
+    <h2 class="headingCls">Create Task</h2>
+    <form method="post" action="{% url 'create_task' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-flex justify-content-center"><button type="submit" class="create-btn8">Create Task</button></div>
+    </form>
+</div>
+{% endblock %}

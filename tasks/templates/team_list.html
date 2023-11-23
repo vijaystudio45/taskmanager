@@ -1,0 +1,27 @@
+<!-- team_list.html -->
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="createTeam-container">
+  <!-- List of Teams -->
+  <h2 class="headingCls">Your Teams</h2>
+  <table class="table table-bordered text-center mt-4 tableBorder22">
+    <thead>
+      <tr>
+        <th>Team Name</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for team in teams %}
+      <tr>
+        <td>{{ team.name }}</td>
+        <td>
+          <a href="{% url 'edit_team' pk=team.id %}" class="btn btn-sm btn-primary">Edit</a>
+          <a href="{% url 'delete_team' pk=team.id %}" class="btn btn-sm btn-danger">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

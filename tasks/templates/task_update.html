@@ -1,0 +1,34 @@
+<!-- update_task.html -->
+<!-- update_task.html -->
+
+{% extends 'base_content.html' %}
+{% block content %}
+  <div class="createTeam-container">
+        <h2 class="headingCls">Edit Task</h2>
+        
+        {% if is_creator %}
+        
+          {# Show usual design for the creator #}
+          <form method="post" action="{% url 'update_task' pk=task.id %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Update Task</button>
+          </form>
+        {% else %}
+          {# Show special design for non-creators #}
+          <form method="post" action="{% url 'update_task' pk=task.id %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+          
+            <!-- Add fields for non-creators, e.g., status -->
+            <label for="id_status">Status:</label>
+            <select name="status" id="id_status">
+              <option value="pending" {% if task_member.status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="completed" {% if task_member.status == 'completed' %}selected{% endif %}>Completed</option>
+            </select>
+            <div class="d-flex justify-content-center mt-3"><button type="submit" class="create-btn8">Update Status</button></div>
+          </form>
+        {% endif %}
+      </div>
+{% endblock %}
+

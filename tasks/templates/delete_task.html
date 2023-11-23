@@ -1,0 +1,13 @@
+<!-- delete_task.html -->
+
+{% extends 'base_content.html' %}
+{% block content %}
+  <div class="delete-container">
+        <h2>Delete Task</h2>
+        <p>Are you sure you want to delete "{{ task.title }}"?</p>
+        <form method="post" action="{% url 'delete_task' pk=task.id %}">
+          {% csrf_token %}
+          <button class="btn btn-danger" type="submit">Delete</button>
+        </form>
+  </div>
+{% endblock %}

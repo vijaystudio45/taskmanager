@@ -1,0 +1,16 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="logincontainer">
+  <div class="loginBox">
+    <h2 class="headingCls">Log in</h2>
+    <form action="{% url 'log_in' %}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% include 'partials/bootstrap_form.html' with form=form %}
+      <input type="submit" value="Log in" class="Loginbtn-color">
+    </form>
+    <hr />
+    <p class="signuptext">Don't have an account? <a href='{% url 'sign_up' %}' class="textColor55">Sign up</a></p>
+  </div>
+</div>
+{% endblock %}

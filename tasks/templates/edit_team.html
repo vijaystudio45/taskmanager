@@ -1,0 +1,14 @@
+<!-- edit_team.html -->
+{% extends 'base_content.html' %}
+{% block content %}
+  <div class="createTeam-container">
+        <h2 class="headingCls">Edit Team</h2>
+        <form method="post" action="{% url 'edit_team' pk=team.id %}">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="d-flex justify-content-center">
+            <button class="create-btn8" type="submit">Update Team</button>
+          </div>
+        </form>
+  </div>
+{% endblock %}

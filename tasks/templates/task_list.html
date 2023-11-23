@@ -1,0 +1,37 @@
+<!-- task_list.html -->
+
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="createTeam-container">
+  <!-- List of Teams -->
+  <h2 class="headingCls">Your Tasks</h2>
+  <table class="table table-bordered text-center mt-4 tableBorder22">
+    <thead>
+      <tr>
+        <th>Team Name</th>
+        <th>Due Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>{{ task.title }}</td>
+        <td>{{ task.due_date }}</td>
+        <td>
+         {%  if list_type == 'creater' %}
+            <a href="{% url 'update_task' pk=task.id %}" class="btn btn-sm btn-primary">Edit</a>
+            <a href="{% url 'delete_task' pk=task.id %}" class="btn btn-sm btn-danger">Delete</a>
+
+          {% else %}
+          <a href="{% url 'my_update_task' pk=task.id %}" class="btn btn-sm btn-primary">Edit</a>
+
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}
