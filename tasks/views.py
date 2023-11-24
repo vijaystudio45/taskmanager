@@ -1,3 +1,11 @@
+from .models import Team, TeamMember, TaskMember, Task
+from .forms import TeamForm, TaskForm
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from tasks.models import User
+from .forms import TeamForm
+from .models import Team, TeamMember
+from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -11,6 +19,8 @@ from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
 from django import forms  # Import the forms module
+from django.db.models import Case, When
+from django.db import models
 
 
 @login_required
@@ -71,12 +81,14 @@ class LogInView(LoginProhibitedMixin, View):
         """Handle log in attempt."""
 
         form = LogInForm(request.POST)
-        self.next = request.POST.get('next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
+        self.next = request.POST.get(
+            'next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
         user = form.get_user()
         if user is not None:
             login(request, user)
             return redirect(self.next)
-        messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
+        messages.add_message(request, messages.ERROR,
+                             "The credentials provided were invalid!")
         return self.render()
 
     def render(self):
@@ -116,7 +128,8 @@ class PasswordView(LoginRequiredMixin, FormView):
     def get_success_url(self):
         """Redirect the user after successful password change."""
 
-        messages.add_message(self.request, messages.SUCCESS, "Password updated!")
+        messages.add_message(
+            self.request, messages.SUCCESS, "Password updated!")
         return reverse('dashboard')
 
 
@@ -134,7 +147,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         """Return redirect URL after successful update."""
-        messages.add_message(self.request, messages.SUCCESS, "Profile updated!")
+        messages.add_message(
+            self.request, messages.SUCCESS, "Profile updated!")
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 
@@ -152,17 +166,12 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
-    
 
-#-----------------------create team functionality----------------------------#
+
+# -----------------------create team functionality----------------------------#
 
 # views.py
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Team, TeamMember
-from .forms import TeamForm
-from tasks.models import User
 
 # @login_required
 # def team_list(request):
@@ -217,21 +226,14 @@ from tasks.models import User
 #     return render(request, 'remove_teammember.html', {'team': team, 'member': member})
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from .models import Team, TeamMember,TaskMember,Task
-from .forms import TeamForm,TaskForm
+# class TeamListView(ListView):
+#     model = Team
+#     template_name = 'team_list.html'
+#     context_object_name = 'teams'
 
-class TeamListView(ListView):
-    model = Team
-    template_name = 'team_list.html'
-    context_object_name = 'teams'
-
-    def get_queryset(self):
-        # Get teams where the logged-in user is a member
-        return Team.objects.filter(members__user=self.request.user)
-    
+#     def get_queryset(self):
+#         # Get teams where the logged-in user is a member
+#         return Team.objects.filter(members__user=self.request.user)
 
 
 # class TeamCreateView(CreateView):
@@ -253,27 +255,28 @@ class TeamCreateView(CreateView):
     model = Team
     form_class = TeamForm
     template_name = 'team_create.html'
-    success_url = reverse_lazy('team_list')
+    success_url = reverse_lazy('dashboard')
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
         team = form.save()
-        
+
         # Add the creator to the team
         TeamMember.objects.create(team=team, user=self.request.user)
-        
+
         # Add selected members to the team
         members = form.cleaned_data.get('members', [])
         for member in members:
             TeamMember.objects.create(team=team, user=member)
 
         return super().form_valid(form)
-    
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        
+
         # Exclude the logged-in user from the members queryset during team creation
-        form.fields['members'].queryset = User.objects.exclude(pk=self.request.user.pk)
+        form.fields['members'].queryset = User.objects.exclude(
+            pk=self.request.user.pk)
         return form
 
 
@@ -300,7 +303,8 @@ class TeamUpdateView(UpdateView):
 
         # Add new members to the team
         for member in members:
-            team_member, created = TeamMember.objects.get_or_create(team=team, user=member)
+            team_member, created = TeamMember.objects.get_or_create(
+                team=team, user=member)
             # Optionally, you can set additional attributes for the TeamMember here
 
         team.save()
@@ -319,8 +323,7 @@ class TeamDeleteView(DeleteView):
     success_url = reverse_lazy('team_list')
 
 
-
-#----------------------------task functionality---------------------#
+# ----------------------------task functionality---------------------#
 
 class TaskListView(ListView):
     model = Task
@@ -329,8 +332,17 @@ class TaskListView(ListView):
 
     def get_queryset(self):
         # Get teams where the logged-in user is a member
-        return Task.objects.filter(member_task__assigned_to=self.request.user)
-    
+        # return Task.objects.filter(member_task__assigned_to=self.request.user)
+        tasks = Task.objects.filter(created_by=self.request.user).order_by(
+            Case(
+                When(priority=Task.HIGH_PRIORITY, then=0),
+                When(priority=Task.LOW_PRIORITY, then=2),
+                When(priority=Task.NORMAL_PRIORITY, then=1),
+                default=3,  # Add a default value to handle any other priorities
+                output_field=models.IntegerField(),
+            )
+        )
+        return tasks
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -339,31 +351,31 @@ class TaskListView(ListView):
         return context
 
 
+# class TaskCreateView(CreateView):
+#     model = Task
+#     form_class = TaskForm
+#     template_name = 'create_task.html'
+#     success_url = reverse_lazy('task_list')
 
-class TaskCreateView(CreateView):
-    model = Task
-    form_class = TaskForm
-    template_name = 'create_task.html'
-    success_url = reverse_lazy('task_list')
+#     def form_valid(self, form):
+#         form.instance.created_by = self.request.user
+#         task = form.save()
 
-    def form_valid(self, form):
-        form.instance.created_by = self.request.user
-        task = form.save()
+#         # Automatically assign the task to all members of the team
+#         team = task.team
+#         team_members = team.members.all()
 
-        # Automatically assign the task to all members of the team
-        team = task.team
-        team_members = team.members.all()
+#         for team_member in team_members:
+#             TaskMember.objects.create(
+#                 team=team,
+#                 task=task,
+#                 assigned_to=team_member.user,
+#                 due_date=task.due_date,
+#                 status='pending'
+#             )
 
-        for team_member in team_members:
-            TaskMember.objects.create(
-                team=team,
-                task=task,
-                assigned_to=team_member.user,
-                due_date=task.due_date,
-                status='pending'
-            )
+#         return super().form_valid(form)
 
-        return super().form_valid(form)
 
 class TaskUpdateView(UpdateView):
     model = Task
@@ -374,13 +386,18 @@ class TaskUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         task = self.get_object()
-        task_member = TaskMember.objects.get(task=task, assigned_to=self.request.user)
+        try:
+            task_member = TaskMember.objects.get(
+                task=task, assigned_to=self.request.user)
 
-        # Pass a flag indicating whether the user is the creator of the task
-        context['is_creator'] = task_member.team.created_by == task.created_by    # check for true and false
-        context['task_member'] = task_member
+            # Pass a flag indicating whether the user is the creator of the task
+            # check for true and false
+            context['is_creator'] = task_member.team.created_by == task.created_by
+            context['task_member'] = task_member
+        except:
+            context['is_creator'] = ""
+            context['task_member'] = ""
         return context
-
 
     def form_valid(self, form):
         task = form.save(commit=False)
@@ -389,12 +406,14 @@ class TaskUpdateView(UpdateView):
         status = self.request.POST.get('status', None)
         if status:
             # Get the TaskMember associated with the current user and task
-            task_member = TaskMember.objects.get(task=task, assigned_to=self.request.user)
+            task_member = TaskMember.objects.get(
+                task=task, assigned_to=self.request.user)
             task_member.status = status
             task_member.save()
 
         task.save()
         return super().form_valid(form)
+
 
 class TaskDeleteView(DeleteView):
     model = Task
@@ -406,12 +425,6 @@ class TaskDeleteView(DeleteView):
         task = self.get_object()
         TaskMember.objects.filter(task=task).delete()
         return super().delete(request, *args, **kwargs)
-    
-
-
-
-
-
 
 
 class MyTaskListView(ListView):
@@ -421,17 +434,23 @@ class MyTaskListView(ListView):
 
     def get_queryset(self):
         # Get teams where the logged-in user is a member
-        return Task.objects.filter(member_task__assigned_to=self.request.user)
-    
+        # return Task.objects.filter(member_task__assigned_to=self.request.user)
+        tasks = Task.objects.filter(member_task__assigned_to=self.request.user).order_by(
+            Case(
+                When(priority=Task.HIGH_PRIORITY, then=0),
+                When(priority=Task.LOW_PRIORITY, then=2),
+                When(priority=Task.NORMAL_PRIORITY, then=1),
+                default=3,  # Add a default value to handle any other priorities
+                output_field=models.IntegerField(),
+            )
+        )
+        return tasks
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add additional context data here
         context['list_type'] = 'my_task'
         return context
-
-
-
 
 
 class TaskMemberUpdateView(UpdateView):
@@ -443,23 +462,28 @@ class TaskMemberUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         task = self.get_object()
-        task_member = TaskMember.objects.get(task=task, assigned_to=self.request.user)
+        try:
+            task_member = TaskMember.objects.get(
+                task=task, assigned_to=self.request.user)
 
-        # Pass a flag indicating whether the user is the creator of the task
-        context['is_creator'] = task_member.team.created_by == task.created_by    # check for true and false
-        context['task_member'] = task_member
-        
+            # Pass a flag indicating whether the user is the creator of the task
+            # check for true and false
+            context['is_creator'] = task_member.team.created_by == task.created_by
+            context['task_member'] = task_member
+        except:
+            context['is_creator'] = ""
+            context['task_member'] = ""
 
         # Iterate through form fields and set them as read-only
         for field_name, field in self.get_form().fields.items():
             context['form'].fields[field_name].widget.attrs['readonly'] = True
+            if field_name == "team":
+                context['form'].fields[field_name].choices = [(task.team.id, str(task.team))]
+            elif field_name == "priority":
+                context['form'].fields[field_name].choices = [(task.priority, str(task.priority))]
 
         return context
     
-
-    
-
-
     def form_valid(self, form):
         task = form.save(commit=False)
 
@@ -467,10 +491,10 @@ class TaskMemberUpdateView(UpdateView):
         status = self.request.POST.get('status', None)
         if status:
             # Get the TaskMember associated with the current user and task
-            task_member = TaskMember.objects.get(task=task, assigned_to=self.request.user)
+            task_member = TaskMember.objects.get(
+                task=task, assigned_to=self.request.user)
             task_member.status = status
             task_member.save()
-
 
         task.save()
         return super().form_valid(form)

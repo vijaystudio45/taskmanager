@@ -64,9 +64,23 @@ class TeamMember(models.Model):
 #---------------task functionality-------------------------------------#
 
 class Task(models.Model):
+    
+    # Define choices for task priority
+    HIGH_PRIORITY = 'high'
+    NORMAL_PRIORITY = 'normal'
+    LOW_PRIORITY = 'low'
+
+    PRIORITY_CHOICES = [
+        (HIGH_PRIORITY, 'High Priority'),
+        (NORMAL_PRIORITY, 'Normal Priority'),
+        (LOW_PRIORITY, 'Low Priority'),
+    ]
+
     team = models.ForeignKey(Team, on_delete=models.CASCADE,related_name='task_team',null=True,blank=True)
     title = models.CharField(max_length=255)
     description =  models.TextField()
+    # Field with choices for priority
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=NORMAL_PRIORITY)
     due_date = models.DateField(null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True,null=True,blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,related_name='task_creator',null=True,blank=True)

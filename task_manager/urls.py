@@ -19,7 +19,7 @@ from django.urls import path
 from tasks import views
 from django.conf.urls.static import static 
 from django.conf import settings 
-from tasks.views import TeamListView,TeamCreateView,TeamUpdateView,TeamDeleteView,TaskListView,TaskCreateView,TaskUpdateView,TaskDeleteView,MyTaskListView,TaskMemberUpdateView
+from tasks.views import TeamCreateView,TeamUpdateView,TeamDeleteView,TaskListView,TaskUpdateView,TaskDeleteView,MyTaskListView,TaskMemberUpdateView
 
 
 urlpatterns = [
@@ -32,14 +32,14 @@ urlpatterns = [
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
 
-    path('teams/', TeamListView.as_view(), name='team_list'),
+    # path('teams/', TeamListView.as_view(), name='team_list'),
     path('create_team/', TeamCreateView.as_view(), name='create_team'),
     path('edit_team/<int:pk>/', TeamUpdateView.as_view(), name='edit_team'),
     path('delete_team/<int:pk>/', TeamDeleteView.as_view(), name='delete_team'),
 
 
     path('task_list/', TaskListView.as_view(), name='task_list'),
-    path('create_task/', TaskCreateView.as_view(), name='create_task'),
+    # path('create_task/', TaskCreateView.as_view(), name='create_task'),
     path('update_task/<int:pk>/', TaskUpdateView.as_view(), name='update_task'),
     path('delete_task/<int:pk>/', TaskDeleteView.as_view(), name='delete_task'),
 

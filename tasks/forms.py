@@ -145,16 +145,19 @@ class TeamForm(forms.ModelForm):
 
 
 class TaskForm(forms.ModelForm):
+    # team_name = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}), required=False)
+
     class Meta:
         model = Task
-        fields = ['title','description', 'due_date','team']
+        fields = ['title','description', 'due_date','team', 'priority']
 
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
- 
+
 
 class TaskMemberForm(forms.ModelForm):
     class Meta:
         model = TaskMember
         fields = ['team', 'task', 'assigned_to', 'due_date', 'status']
+
