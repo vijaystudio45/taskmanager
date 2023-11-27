@@ -48,17 +48,17 @@ class Team(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,related_name='user_team')
-
+    team_member = models.ManyToManyField(User,related_name='user_team_member')
 
     def __str__(self):
         return self.name
 
-class TeamMember(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='members')
-    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='user_member')
+# class TeamMember(models.Model):
+#     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='members')
+#     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='user_member')
 
-    def __str__(self):
-        return f"{self.user.username} - {self.team.name}"
+    # def __str__(self):
+    #     return f" {self.name}"
     
 
 #---------------task functionality-------------------------------------#

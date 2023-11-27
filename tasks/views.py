@@ -1,10 +1,10 @@
-from .models import Team, TeamMember, TaskMember, Task
+from .models import Team, TaskMember, Task
 from .forms import TeamForm, TaskForm
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from tasks.models import User
 from .forms import TeamForm
-from .models import Team, TeamMember
+from .models import Team
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.contrib import messages
@@ -259,25 +259,16 @@ class TeamCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
-        team = form.save()
-
-        # Add the creator to the team
-        TeamMember.objects.create(team=team, user=self.request.user)
-
-        # Add selected members to the team
-        members = form.cleaned_data.get('members', [])
-        for member in members:
-            TeamMember.objects.create(team=team, user=member)
-
+        # team = form.save()
         return super().form_valid(form)
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
 
-        # Exclude the logged-in user from the members queryset during team creation
-        form.fields['members'].queryset = User.objects.exclude(
-            pk=self.request.user.pk)
-        return form
+    #     # Exclude the logged-in user from the members queryset during team creation
+    #     form.fields['members'].queryset = User.objects.exclude(
+    #         pk=self.request.user.pk)
+    #     return form
 
 
 # class TeamUpdateView(UpdateView):
@@ -299,12 +290,12 @@ class TeamUpdateView(UpdateView):
 
     def form_valid(self, form):
         team = form.save(commit=False)
-        members = form.cleaned_data.get('members', [])
+        # members = form.cleaned_data.get('members', [])
 
-        # Add new members to the team
-        for member in members:
-            team_member, created = TeamMember.objects.get_or_create(
-                team=team, user=member)
+        # # Add new members to the team
+        # for member in members:
+        #     team_member, created = TeamMember.objects.get_or_create(
+        #         team=team, user=member)
             # Optionally, you can set additional attributes for the TeamMember here
 
         team.save()

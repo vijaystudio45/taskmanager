@@ -117,27 +117,27 @@ from .models import Team,TaskMember,Task
 class TeamForm(forms.ModelForm):
     class Meta:
         model = Team
-        fields = ['name', 'description']
+        fields = ['name', 'description','team_member']
 
     widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
-            'members': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            # 'members': forms.SelectMultiple(attrs={'class': 'form-control'}),
         }
-    members = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
-        required=False  # Allow creating a team without members initially
-    )
+    # members = forms.ModelMultipleChoiceField(
+    #     queryset=User.objects.all(),
+    #     widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+    #     required=False  # Allow creating a team without members initially
+    # )
     def __init__(self, *args, **kwargs):
         super(TeamForm, self).__init__(*args, **kwargs)
         
         # Exclude the logged-in user from the members queryset
         if 'instance' in kwargs and kwargs['instance']:
-            member_remove = kwargs['instance'].members.all().values_list('user', flat=True)
+            # member_remove = kwargs['instance'].members.all().values_list('user', flat=True)
             logged_in_user = kwargs['instance'].created_by
             # member_remove.append(logged_in_user.pk)
-            self.fields['members'].queryset = User.objects.exclude(pk__in=member_remove)
+            self.fields['team_member'].queryset = User.objects.exclude(pk__in=logged_in_user)
 
 #----------------------task functionality---------------------------------------------#
 

@@ -213,6 +213,7 @@ h3.profile-title {
 #id_description,
 #id_title,
 #id_due_date,
+#id_team_member,
 #id_team,
 #id_status {
   display: block;
@@ -236,7 +237,8 @@ h3.profile-title {
 #id_title:focus,
 #id_due_date:focus,
 #id_team:focus,
-#id_status:focus {
+#id_status:focus,
+#id_team_member:focus {
   border-color: #008080 !important;
   box-shadow: none !important;
   outline: none;
